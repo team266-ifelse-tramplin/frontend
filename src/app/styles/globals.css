@@ -24,3 +24,28 @@
     @apply bg-background text-text min-h-screen font-display;
   }
 }
+
+@layer components {
+  .btn {
+    @apply cursor-pointer inline-flex items-center justify-center gap-2
+                     px-4 py-2
+                     text-base font-bold
+                     rounded-md
+                     transition-all duration-200
+                     disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply bg-primary text-white
+             hover:bg-primary-hover
+             active:scale-[0.98]
+             shadow-sm
+             hover:shadow-md
+             active:shadow-lg;
+  }
+  .btn-secondary {
+    @apply bg-surface text-text
+               border border-border
+               hover:bg-background
+               active:scale-[0.98];
+  }
+}
