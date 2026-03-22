@@ -15,10 +15,12 @@
   --color-text-secondary: #64748b;
 
   --color-border: #e2e8f0;
+
+  --font-display: 'Manrope', sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-background text-text;
+    @apply bg-background text-text min-h-screen font-display;
   }
 }
