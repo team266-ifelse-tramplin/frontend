@@ -1,0 +1,1 @@
+export const THEME_STORAGE_KEY = 'tramplin-theme';

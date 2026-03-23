@@ -8,36 +8,58 @@
   --color-error: #ef4444;
   --color-warning: #f59e0b;
 
-  --color-background: #f8fafc;
+  --color-background: #f6f7fb;
   --color-surface: #ffffff;
+  --color-header-bg: #ffffffe6;
 
   --color-text: #0f172a;
   --color-text-secondary: #64748b;
 
-  --color-border: #e2e8f0;
+  --color-border: #d9dee8;
 
   --font-display: 'Manrope', sans-serif;
 }
 
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    --color-background: #141418;
+    --color-surface: #1b1b21;
+    --color-header-bg: #0d0d10f2;
+    --color-text: #f3f4f6;
+    --color-text-secondary: #a1a1aa;
+    --color-border: #2a2a33;
+    color-scheme: dark;
+  }
+
   body {
     @apply bg-background text-text min-h-screen font-display;
+    transition:
+      background-color 300ms ease,
+      color 300ms ease;
+  }
+  /* отключаем анимацию если установлена опция "Уменьшить анимацию" */
+  @media (prefers-reduced-motion: reduce) {
+    body {
+      transition: none;
+    }
   }
 }
 
 @layer components {
   .btn {
     @apply cursor-pointer inline-flex items-center justify-center gap-2
-                     px-4 py-2
-                     text-base font-bold
-                     rounded-md
+                     font-semibold
                      transition-all duration-200
                      disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-primary {
     @apply bg-primary text-white
              hover:bg-primary-hover
-             active:scale-[0.98]
+             active:scale-[0.96]
              shadow-sm
              hover:shadow-md
              active:shadow-lg;
@@ -46,6 +68,6 @@
     @apply bg-surface text-text
                border border-border
                hover:bg-background
-               active:scale-[0.98];
+               active:scale-[0.96];
   }
 }
