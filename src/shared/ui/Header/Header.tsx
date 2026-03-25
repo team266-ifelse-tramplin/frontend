@@ -89,10 +89,10 @@ export const Header = () => {
             </button>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="sec" size="lg">
+              <Button variant="sec" size="md">
                 Войти
               </Button>
-              <Button size="lg">Регистрация</Button>
+              <Button size="md">Регистрация</Button>
             </div>
           )}
 

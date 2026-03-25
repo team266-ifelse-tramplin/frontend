@@ -70,13 +70,25 @@
                active:scale-95;
     }
     &.sm {
-      @apply px-3 py-1.5 text-sm rounded-lg;
+      @apply px-3 py-1.5 text-sm;
     }
     &.md {
-      @apply px-4 py-2 text-sm rounded-xl;
+      @apply px-5 py-2.5 text-base;
     }
     &.lg {
-      @apply px-5 py-2.5 text-base rounded-xl;
+      @apply px-6 py-3 text-xl;
+    }
+    &.r-lg {
+      @apply rounded-lg;
+    }
+    &.r-xl {
+      @apply rounded-xl;
+    }
+    &.r-2xl {
+      @apply rounded-2xl;
+    }
+    &.r-full {
+      @apply rounded-full;
     }
   }
 
@@ -99,4 +111,5 @@
   .header-profile-btn {
     @apply flex items-center gap-2 rounded-md px-2 py-1 transition hover:bg-background;
   }
+
 }
