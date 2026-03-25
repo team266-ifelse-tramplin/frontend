@@ -55,19 +55,48 @@
                      font-semibold
                      transition-all duration-200
                      disabled:opacity-50 disabled:pointer-events-none;
-  }
-  .btn-primary {
-    @apply bg-primary text-white
-             hover:bg-primary-hover
-             active:scale-[0.96]
-             shadow-sm
-             hover:shadow-md
-             active:shadow-lg;
-  }
-  .btn-secondary {
-    @apply bg-surface text-text
+    &.pri {
+      @apply bg-primary text-white
+               hover:bg-primary-hover
+               active:scale-95
+               shadow-sm
+               hover:shadow-md
+               active:shadow-lg;
+    }
+    &.sec {
+      @apply bg-surface text-text
                border border-border
                hover:bg-background
-               active:scale-[0.96];
+               active:scale-95;
+    }
+    &.sm {
+      @apply px-3 py-1.5 text-sm rounded-lg;
+    }
+    &.md {
+      @apply px-4 py-2 text-sm rounded-xl;
+    }
+    &.lg {
+      @apply px-5 py-2.5 text-base rounded-xl;
+    }
+  }
+
+  .header-nav-link {
+    @apply text-text-secondary transition-colors hover:text-primary;
+  }
+
+  .header-chip {
+    @apply items-center gap-2 rounded-xl border border-border bg-background/70 px-4 py-2.5 text-base font-semibold text-text-secondary;
+  }
+
+  .header-chip-link {
+    @apply flex transition-colors hover:text-primary;
+  }
+
+  .header-chip-icon {
+    @apply h-5 w-5 text-primary;
+  }
+
+  .header-profile-btn {
+    @apply flex items-center gap-2 rounded-md px-2 py-1 transition hover:bg-background;
   }
 }
