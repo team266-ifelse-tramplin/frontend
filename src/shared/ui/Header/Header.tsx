@@ -1,43 +1,58 @@
-import { useEffect, useState } from 'react';
-import { MapPin, Moon, Star, Sun } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@shared/ui/Button';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getStoredTheme } from '@shared/lib/getStoredTheme';
-import { THEME_STORAGE_KEY } from '@shared/config/constants';
+import { toggleTheme } from '@shared/lib/toggleTheme';
+import { useCloseOnOutsideClick } from '@shared/lib/useCloseOnOutsideClick';
+import { useFavoriteIds } from '@shared/lib/useFavoriteIds';
+import { authService } from '@features/auth';
+import { useAuth } from '@app/providers';
+import { THEME_STORAGE_KEY } from '@/shared/config/themeKey';
 import { type Theme } from '@shared/types/theme';
+import { type UserRole } from '@shared/types/roles';
+import { CITIES } from '@shared/config/mocks';
+import { GUEST_NAV_ITEMS, CANDIDATE_NAV_ITEMS, COMPANY_NAV_ITEMS } from '@shared/config/navItems';
+import {
+  HeaderAuthActions,
+  HeaderFavorites,
+  HeaderLocation,
+  HeaderLogo,
+  HeaderNav,
+  HeaderProfile,
+  HeaderThemeToggle,
+} from './HeaderItems';
 
-type UserRole = 'guest' | 'job-seeker' | 'employer';
-type NavItem = { to: string; label: string };
-
-const GUEST_NAV_ITEMS: readonly NavItem[] = [
-  { to: '/jobs', label: 'Вакансии' },
-  { to: '/map', label: 'Карта' },
-];
-
-const JOB_SEEKER_NAV_ITEMS: readonly NavItem[] = [
-  ...GUEST_NAV_ITEMS,
-  { to: '/responses', label: 'Отклики' },
-];
-
-const EMPLOYER_NAV_ITEMS: readonly NavItem[] = [
-  { to: '/my-jobs', label: 'Мои вакансии' },
-  { to: '/jobs/create', label: 'Создать' },
-  { to: '/candidates', label: 'Кандидаты' },
-];
-
+const navMap = {
+  guest: GUEST_NAV_ITEMS,
+  applicant: CANDIDATE_NAV_ITEMS,
+  company: COMPANY_NAV_ITEMS,
+};
 export const Header = () => {
-  const [userRole] = useState<UserRole>('guest');
+  const navigate = useNavigate();
+  const { session, signOut } = useAuth();
+  const userRole: UserRole = session?.role ?? 'guest';
   const isAuth = userRole !== 'guest';
   const [theme, setTheme] = useState<Theme>(() => getStoredTheme());
-  const favoritesCount = 3;
-  const city = 'Москва';
-  const navItems =
-    userRole === 'employer'
-      ? EMPLOYER_NAV_ITEMS
-      : userRole === 'job-seeker'
-        ? JOB_SEEKER_NAV_ITEMS
-        : GUEST_NAV_ITEMS;
+  const { favoriteIds } = useFavoriteIds();
+  const favoritesCount = favoriteIds.length;
+  const fullName = session?.login ?? session?.email ?? 'Гость';
+  const [selectedCity, setSelectedCity] = useState('Москва');
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [citySearch, setCitySearch] = useState('');
+  const locationRef = useRef<HTMLDivElement | null>(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
+  const themeToggleRef = useRef<HTMLButtonElement | null>(null);
+  const navItems = navMap[userRole];
   const isDarkTheme = theme === 'dark';
+  const filteredCities = useMemo(() => {
+    const search = citySearch.trim().toLowerCase();
+    return CITIES.filter((city) => city.toLowerCase().includes(search));
+  }, [citySearch]);
+  const userDisplayName = useMemo(() => {
+    const [firstName = '', lastName = ''] = fullName.trim().split(/\s+/);
+    const lastInitial = lastName ? `${lastName[0]?.toUpperCase()}.` : '';
+    return [firstName, lastInitial].filter(Boolean).join(' ');
+  }, [fullName]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -45,90 +60,80 @@ export const Header = () => {
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  useCloseOnOutsideClick({
+    ref: locationRef,
+    isOpen: isLocationOpen,
+    onClose: () => setIsLocationOpen(false),
+  });
+
+  useCloseOnOutsideClick({
+    ref: profileRef,
+    isOpen: isProfileOpen,
+    onClose: () => setIsProfileOpen(false),
+  });
+
+  const handleToggleTheme = () => {
+    toggleTheme({ themeToggleRef, setTheme });
+  };
+
+  const handleSignOut = () => {
+    void (async () => {
+      await authService.sign_out();
+      signOut();
+      setIsProfileOpen(false);
+      navigate('/auth/login');
+    })();
   };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-header-bg backdrop-blur transition-colors duration-300">
-      <div className="flex h-18 w-full items-center justify-between gap-8 px-5 md:px-8">
+      <div className="mx-auto flex h-18 w-full max-w-[1760px] items-center justify-between gap-8 px-5 md:px-8">
         <div className="flex min-w-0 items-center gap-10">
-          <Link to="/" className="flex items-center whitespace-nowrap">
-            <img src="/images/logo.svg" alt="Logo" className="h-9 w-9 text-primary" />
-            <span className="text-2xl font-bold tracking-tight text-text">ramplin</span>
-          </Link>
-
-          <nav className="flex items-center gap-9 text-lg font-semibold tracking-tight">
-            {navItems.map((item) => (
-              <Link key={item.to} to={item.to} className="header-nav-link">
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <HeaderLogo />
+          <HeaderNav navItems={navItems} />
         </div>
 
         <div className="flex shrink-0 items-center justify-end gap-3 md:gap-4">
-          <div className="header-chip hidden sm:flex">
-            <MapPin className="header-chip-icon" strokeWidth={2.2} />
-            <span>{city}</span>
-          </div>
+          <HeaderLocation
+            locationRef={locationRef}
+            isLocationOpen={isLocationOpen}
+            selectedCity={selectedCity}
+            citySearch={citySearch}
+            filteredCities={filteredCities}
+            onToggle={() => setIsLocationOpen((prev) => !prev)}
+            onSearchChange={setCitySearch}
+            onSelectCity={(city) => {
+              setSelectedCity(city);
+              setIsLocationOpen(false);
+              setCitySearch('');
+            }}
+          />
 
-          <Link to="/favorites" className="header-chip header-chip-link relative">
-            <Star className="header-chip-icon" strokeWidth={2.2} />
-            <span className="hidden sm:inline">Избранное</span>
-            <span className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold text-white">
-              {favoritesCount}
-            </span>
-          </Link>
+          <HeaderFavorites favoritesCount={favoritesCount} />
 
           {isAuth ? (
-            <button className="header-profile-btn">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-base font-medium text-white">
-                A
-              </div>
-            </button>
+            <HeaderProfile
+              profileRef={profileRef}
+              isProfileOpen={isProfileOpen}
+              fullName={fullName}
+              userDisplayName={userDisplayName}
+              role={session?.role ?? 'applicant'}
+              onToggle={() => setIsProfileOpen((prev) => !prev)}
+              onOpenProfile={() => {
+                setIsProfileOpen(false);
+                navigate('/profile');
+              }}
+              onSignOut={handleSignOut}
+            />
           ) : (
-            <div className="flex items-center gap-2">
-              <Button variant="sec" size="md">
-                Войти
-              </Button>
-              <Button size="md">Регистрация</Button>
-            </div>
+            <HeaderAuthActions />
           )}
 
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className={`relative h-8 w-14 rounded-full border transition-all duration-300 ${
-              isDarkTheme ? 'border-primary bg-primary' : 'border-slate-300 bg-slate-200'
-            }`}
-            aria-label="Переключить тему"
-            title="Переключить тему"
-          >
-            <span className="absolute inset-0 flex items-center justify-between px-2.5">
-              <Sun
-                className={`h-3.5 w-3.5 transition-all duration-300 ${
-                  isDarkTheme
-                    ? 'scale-95 text-white opacity-100'
-                    : 'scale-100 text-amber-600 opacity-100'
-                }`}
-              />
-              <Moon
-                className={`h-3.5 w-3.5 transition-all duration-300 ${
-                  isDarkTheme
-                    ? 'scale-100 text-white opacity-100'
-                    : 'scale-95 text-slate-600 opacity-90'
-                }`}
-              />
-            </span>
-            <span
-              className={`absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ${
-                isDarkTheme ? 'translate-x-6 text-primary' : 'translate-x-0 text-slate-600'
-              }`}
-            >
-              {isDarkTheme ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            </span>
-          </button>
+          <HeaderThemeToggle
+            themeToggleRef={themeToggleRef}
+            isDarkTheme={isDarkTheme}
+            onToggle={handleToggleTheme}
+          />
         </div>
       </div>
     </header>

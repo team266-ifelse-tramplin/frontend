@@ -1,4 +1,4 @@
-import { THEME_STORAGE_KEY } from '@shared/config/constants';
+import { THEME_STORAGE_KEY } from '@/shared/config/themeKey';
 import { type Theme } from '@shared/types/theme';
 
 export const getStoredTheme = (): Theme => {
