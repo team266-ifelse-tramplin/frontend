@@ -120,12 +120,14 @@ export const OpportunityPage = () => {
       return;
     }
     setRespondMessage(null);
+
+    if (session && session.role !== 'applicant') {
+      setRespondMessage('Отклик доступен только соискателям.');
+      return;
+    }
+
     const applicantId =
-      session &&
-      session.accessToken &&
-      session.role === 'applicant' &&
-      session.userId &&
-      isBackendAuthEnabled()
+      session && session.role === 'applicant' && session.accessToken && session.userId
         ? session.userId
         : null;
 
@@ -149,7 +151,12 @@ export const OpportunityPage = () => {
       return;
     }
 
-    navigate('/applications');
+    if (session?.role === 'applicant' && !isBackendAuthEnabled()) {
+      navigate('/applications');
+      return;
+    }
+
+    navigate(`/auth/login?returnTo=${encodeURIComponent(`/opportunities/${id}`)}`);
   };
 
   const details = [

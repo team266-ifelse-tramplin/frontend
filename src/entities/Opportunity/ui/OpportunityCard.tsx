@@ -119,16 +119,26 @@ export const OpportunityCard = ({
       <div className="mt-4 flex items-center justify-between gap-3">
         <span className="text-xs font-medium text-text-secondary">{opportunity.publication_date}</span>
         {showRespondButton ? (
-          <Button
-            size="sm"
-            rounded="xl"
-            onClick={(event) => {
-              event.stopPropagation();
-              onRespond?.();
-            }}
-          >
-            Откликнуться
-          </Button>
+          onRespond ? (
+            <Button
+              size="sm"
+              rounded="xl"
+              onClick={(event) => {
+                event.stopPropagation();
+                onRespond();
+              }}
+            >
+              Откликнуться
+            </Button>
+          ) : detailsHref ? (
+            <Link
+              to={detailsHref}
+              onClick={(event) => event.stopPropagation()}
+              className="btn pri sm r-xl"
+            >
+              Откликнуться
+            </Link>
+          ) : null
         ) : null}
       </div>
     </article>
