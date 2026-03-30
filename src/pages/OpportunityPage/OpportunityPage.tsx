@@ -14,6 +14,7 @@ import {
   getOpportunityTypeLabel,
   getWorkFormatLabel,
 } from '@shared/lib/opportunityDisplay';
+import { upsertLocalApplicantResponse } from '@shared/lib/localApplicantResponsesStorage';
 import { useFavoriteIds } from '@shared/lib/useFavoriteIds';
 import { Button } from '@shared/ui/Button';
 
@@ -25,7 +26,6 @@ export const OpportunityPage = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   const { favoriteIds, toggleFavorite } = useFavoriteIds();
-  const [respondBusy, setRespondBusy] = useState(false);
   const [respondMessage, setRespondMessage] = useState<string | null>(null);
   const [opportunity, setOpportunity] = useState<ReturnType<typeof mapBackendOpportunityToUi> | null>(null);
   const [relatedOpportunities, setRelatedOpportunities] = useState<ReturnType<typeof mapBackendOpportunityToUi>[]>([]);
@@ -129,22 +129,20 @@ export const OpportunityPage = () => {
       session && session.role === 'applicant' && session.userId ? session.userId : null;
 
     if (applicantId) {
-      setRespondBusy(true);
-      void usersApi
-        .makeApplication({
-          opportunity_id: id,
-          applicant_id: applicantId,
-        })
-        .then(() => {
-          setRespondMessage('Отклик отправлен.');
-          navigate('/applications');
-        })
-        .catch(() => {
-          setRespondMessage('Не удалось отправить отклик. Попробуй ещё раз.');
-        })
-        .finally(() => {
-          setRespondBusy(false);
-        });
+      const now = new Date().toISOString();
+      upsertLocalApplicantResponse(applicantId, {
+        id: `local-${id}-${Date.now()}`,
+        opportunityId: id,
+        status: 'pending',
+        appliedAt: now,
+        updatedAt: now,
+      });
+      void usersApi.makeApplication({
+        opportunity_id: id,
+        applicant_id: applicantId,
+      });
+      setRespondMessage('Отклик отправлен.');
+      navigate('/applications');
       return;
     }
 
@@ -207,8 +205,8 @@ export const OpportunityPage = () => {
               >
                 <Heart className={`h-4 w-4 ${favoriteIds.includes(opportunity.id) ? 'fill-current' : ''}`} />
               </button>
-              <Button rounded="xl" disabled={respondBusy} onClick={handleRespond}>
-                {respondBusy ? 'Отправка…' : 'Откликнуться'}
+              <Button rounded="xl" onClick={handleRespond}>
+                Откликнуться
               </Button>
             </div>
           </div>
@@ -260,8 +258,8 @@ export const OpportunityPage = () => {
               <p>Статус: {opportunity.status}</p>
               <p>Опубликовано: {opportunity.publication_date}</p>
             </div>
-            <Button className="mt-5 w-full" rounded="xl" disabled={respondBusy} onClick={handleRespond}>
-              {respondBusy ? 'Отправка…' : 'Откликнуться'}
+            <Button className="mt-5 w-full" rounded="xl" onClick={handleRespond}>
+              Откликнуться
             </Button>
           </aside>
         </section>
