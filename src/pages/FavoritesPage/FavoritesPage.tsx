@@ -1,21 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { OpportunityCard, mapBackendOpportunityToUi, opportunitiesApi, type Opportunity } from '@entities/Opportunity';
+import {
+  OpportunityCard,
+  mapBackendOpportunityToUi,
+  opportunitiesApi,
+  type Opportunity,
+} from '@entities/Opportunity';
 import { useFavoriteIds } from '@shared/lib/useFavoriteIds';
 import { Header } from '@shared/ui/Header';
 
-const INITIAL_FAVORITE_IDS = [
-  'ba7e6b08-9fea-4dc4-937e-f731801e0000',
-  'ba7e6b08-9fea-4dc4-937e-f731801e0001',
-  'ba7e6b08-9fea-4dc4-937e-f731801e0002',
-  'ba7e6b08-9fea-4dc4-937e-f731801e0003',
-  'ba7e6b08-9fea-4dc4-937e-f731801e0006',
-  'ba7e6b08-9fea-4dc4-937e-f731801e0008',
-];
-
 export const FavoritesPage = () => {
-  const { favoriteIds, toggleFavorite } = useFavoriteIds(INITIAL_FAVORITE_IDS);
+  const { favoriteIds, toggleFavorite } = useFavoriteIds();
   const [favoriteJobs, setFavoriteJobs] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +64,9 @@ export const FavoritesPage = () => {
     };
   }, [favoriteIds]);
 
+  const isEmpty = favoriteIds.length === 0;
+  console.log('favoriteJobs', favoriteIds);
+
   return (
     <>
       <Header />
@@ -80,14 +79,16 @@ export const FavoritesPage = () => {
               </span>
               <h1 className="text-xl font-bold text-text">Избранное</h1>
               <span className="inline-flex min-w-8 items-center justify-center rounded-full bg-primary px-2 py-1 text-xs font-semibold text-white">
-                {favoriteJobs.length}
+                {favoriteIds.length}
               </span>
             </div>
           </div>
-          {loading ? <p className="mb-3 text-sm text-text-secondary">Загружаем избранные вакансии...</p> : null}
+          {loading ? (
+            <p className="mb-3 text-sm text-text-secondary">Загружаем избранные вакансии...</p>
+          ) : null}
           {error ? <p className="mb-3 text-sm text-red-500">{error}</p> : null}
 
-          {favoriteJobs.length === 0 ? (
+          {isEmpty ? (
             <div className="rounded-xl border border-dashed border-border/80 bg-background/50 px-4 py-8 text-center">
               <p className="text-base font-semibold text-text">В избранном пока пусто</p>
               <p className="mt-1 text-sm text-text-secondary">
@@ -102,6 +103,11 @@ export const FavoritesPage = () => {
             </div>
           ) : (
             <div className="space-y-3">
+              {!loading && favoriteJobs.length === 0 ? (
+                <p className="text-sm text-text-secondary">
+                  Карточки не загрузились — проверь API или список id в избранном.
+                </p>
+              ) : null}
               {favoriteJobs.map((job) => (
                 <OpportunityCard
                   key={job.id}

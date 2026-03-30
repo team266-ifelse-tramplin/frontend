@@ -52,7 +52,10 @@ export const AuthLoginPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await authService.send_email_code({ email: normalizedEmail, purpose: 'sign_in' });
+      const response = await authService.send_email_code({
+        email: normalizedEmail,
+        purpose: 'sign_in',
+      });
       setRetryAfterSec(response.retryAfterSec);
       setDemoCode(response.demoCode);
       setStep('verify');
@@ -83,7 +86,9 @@ export const AuthLoginPage = () => {
       <main className="mx-auto w-full max-w-[560px] px-5 py-10 md:px-8">
         <section className="rounded-2xl border border-border/80 bg-surface p-6 shadow-sm">
           <h1 className="text-2xl font-bold text-text">Вход по email</h1>
-          <p className="mt-1 text-sm text-text-secondary">Введи email, получи код и подтверди вход.</p>
+          <p className="mt-1 text-sm text-text-secondary">
+            Введи email, получи код и подтверди вход.
+          </p>
 
           {step === 'request' ? (
             <div className="mt-4 space-y-3">
@@ -98,7 +103,10 @@ export const AuthLoginPage = () => {
               </label>
               {error ? <p className="text-sm text-red-500">{error}</p> : null}
               <div className="flex items-center justify-between gap-3">
-                <Link to="/auth/register" className="text-sm font-semibold text-primary hover:text-primary-hover">
+                <Link
+                  to="/auth/register"
+                  className="text-sm font-semibold text-primary hover:text-primary-hover"
+                >
                   Нет аккаунта? Регистрация
                 </Link>
                 <Button type="button" onClick={requestCode} disabled={loading}>
@@ -112,13 +120,7 @@ export const AuthLoginPage = () => {
                 email={normalizedEmail}
                 loading={loading}
                 error={error}
-                helperText={
-                  demoCode
-                    ? `Demo-код для мока: ${demoCode}`
-                    : isBackendAuthEnabled()
-                      ? 'Код из письма.'
-                      : undefined
-                }
+                helperText={''}
                 retryAfterSec={retryAfterSec}
                 onBack={() => {
                   setStep('request');

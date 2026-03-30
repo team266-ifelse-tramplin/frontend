@@ -1,8 +1,8 @@
 import { type RefObject } from 'react';
 import { ArrowUpRight, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { type JobPoint } from '@features/jobs-map/model/types';
 import { JobsMapSurface } from './JobsMapSurface';
-import { Button } from '@shared/ui/Button';
 
 type JobsMapCardProps = {
   jobs: JobPoint[];
@@ -26,18 +26,13 @@ export const JobsMapCard = ({
           </span>
           <span className="text-sm font-semibold text-text">Карта вакансий</span>
         </div>
-        <Button
-          type="button"
-          variant="sec"
-          size="sm"
-          onClick={() =>
-            mapSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }
-          //   className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
+        <Link
+          to="/map"
+          className="btn sec sm r-lg inline-flex items-center gap-1"
         >
           Перейти к карте
           <ArrowUpRight className="h-4 w-4" />
-        </Button>
+        </Link>
       </div>
       <div ref={mapSectionRef}>
         <JobsMapSurface jobs={jobs} selectedJobId={selectedJobId} onSelectJob={onSelectJob} />

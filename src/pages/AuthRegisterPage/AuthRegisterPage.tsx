@@ -106,11 +106,7 @@ export const AuthRegisterPage = () => {
     }
   };
 
-  const verifyHelperText = demoCode
-    ? `Demo-код для мока: ${demoCode}`
-    : isBackendAuthEnabled()
-      ? 'Введи код из письма.'
-      : undefined;
+  const verifyHelperText = '';
 
   return (
     <>
@@ -155,7 +151,9 @@ export const AuthRegisterPage = () => {
               </label>
               {isBackendAuthEnabled() ? (
                 <label className="block">
-                  <span className="mb-1 block text-sm font-semibold text-text-secondary">Телефон</span>
+                  <span className="mb-1 block text-sm font-semibold text-text-secondary">
+                    Телефон
+                  </span>
                   <input
                     value={phone}
                     onChange={(event) => setPhone(event.target.value)}

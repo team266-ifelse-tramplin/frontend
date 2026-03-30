@@ -65,12 +65,20 @@ export const useFavoriteIds = (initialIds: string[] = DEFAULT_INITIAL_FAVORITE_I
       return;
     }
 
+    let cancelled = false;
+    setFavoriteIds([]);
+
     const controller = new AbortController();
     void favoritesApi.getAll(userId, controller.signal).then((res) => {
-      setFavoriteIds(res.data.map((row) => row.opportunity_id));
+      if (!cancelled) {
+        setFavoriteIds(res.data.map((row) => row.opportunity_id));
+      }
     });
 
-    return () => controller.abort();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [useApi, userId, accessToken]);
 
   useEffect(() => {
