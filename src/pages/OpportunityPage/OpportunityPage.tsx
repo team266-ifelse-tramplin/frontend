@@ -4,7 +4,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@app/providers';
 import { OpportunityCard, mapBackendOpportunityToUi, opportunitiesApi } from '@entities/Opportunity';
 import { usersApi } from '@shared/api/usersApi';
-import { isBackendAuthEnabled } from '@shared/config/features';
 import { Header } from '@shared/ui/Header';
 import {
   formatOpportunitySalary,
@@ -127,9 +126,7 @@ export const OpportunityPage = () => {
     }
 
     const applicantId =
-      session && session.role === 'applicant' && session.accessToken && session.userId
-        ? session.userId
-        : null;
+      session && session.role === 'applicant' && session.userId ? session.userId : null;
 
     if (applicantId) {
       setRespondBusy(true);
@@ -148,11 +145,6 @@ export const OpportunityPage = () => {
         .finally(() => {
           setRespondBusy(false);
         });
-      return;
-    }
-
-    if (session?.role === 'applicant' && !isBackendAuthEnabled()) {
-      navigate('/applications');
       return;
     }
 
